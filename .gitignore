@@ -1,0 +1,24 @@
+/node_modules
+# public/build is intentionally included for shared hosting deployment
+# (no npm/build step available on Namecheap shared hosting)
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+.env
+.env.backup
+.env.production
+.phpactor.json
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+/auth.json
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+/.phpunit.cache
