@@ -72,25 +72,34 @@ class OwnerController extends Controller
     {
         $request->validate([
             'name'                    => 'required|string|max:100',
+            'type'                    => 'required|in:owner,investor',
             'profit_share_percentage' => 'required|numeric|min:0|max:100',
+            'contribution_amount'     => 'nullable|numeric|min:0',
+            'agreement_start_date'    => 'nullable|date',
+            'agreement_end_date'      => 'nullable|date|after_or_equal:agreement_start_date',
+            'profit_basis'            => 'required_if:type,investor|in:net_profit,sales_revenue',
             'notes'                   => 'nullable|string|max:500',
         ]);
 
-        // Warn if total shares exceed 100%
         $currentTotal = Owner::where('is_active', true)->sum('profit_share_percentage');
         $newTotal     = $currentTotal + (float) $request->profit_share_percentage;
 
         $owner = Owner::create([
             'name'                    => $request->name,
+            'type'                    => $request->type,
             'profit_share_percentage' => $request->profit_share_percentage,
+            'profit_basis'            => $request->profit_basis ?? 'net_profit',
+            'contribution_amount'     => $request->filled('contribution_amount') ? Money::toCents($request->contribution_amount) : 0,
+            'agreement_start_date'    => $request->agreement_start_date,
+            'agreement_end_date'      => $request->agreement_end_date,
             'sort_order'              => Owner::max('sort_order') + 1,
             'is_active'               => true,
             'notes'                   => $request->notes,
         ]);
 
-        ActivityLogger::log('owner_create', "Owner '{$owner->name}' added with {$owner->profit_share_percentage}% share", Owner::class, $owner->id);
+        ActivityLogger::log('owner_create', "'{$owner->name}' ({$owner->type}) added with {$owner->profit_share_percentage}% share", Owner::class, $owner->id);
 
-        $message = "Owner '{$owner->name}' added.";
+        $message = "{$owner->type === 'investor' ? 'Investor' : 'Owner'} '{$owner->name}' added.";
         if ($newTotal > 100) {
             $message .= " Warning: total profit shares now exceed 100% ({$newTotal}%). Please adjust shares.";
         }
@@ -107,25 +116,34 @@ class OwnerController extends Controller
     {
         $request->validate([
             'name'                    => 'required|string|max:100',
+            'type'                    => 'required|in:owner,investor',
             'profit_share_percentage' => 'required|numeric|min:0|max:100',
+            'contribution_amount'     => 'nullable|numeric|min:0',
+            'agreement_start_date'    => 'nullable|date',
+            'agreement_end_date'      => 'nullable|date',
+            'profit_basis'            => 'required|in:net_profit,sales_revenue',
             'notes'                   => 'nullable|string|max:500',
             'is_active'               => 'boolean',
         ]);
 
         $owner->update([
             'name'                    => $request->name,
+            'type'                    => $request->type,
             'profit_share_percentage' => $request->profit_share_percentage,
+            'profit_basis'            => $request->profit_basis,
+            'contribution_amount'     => $request->filled('contribution_amount') ? Money::toCents($request->contribution_amount) : 0,
+            'agreement_start_date'    => $request->agreement_start_date,
+            'agreement_end_date'      => $request->agreement_end_date,
             'is_active'               => $request->boolean('is_active', true),
             'notes'                   => $request->notes,
         ]);
 
-        ActivityLogger::log('owner_update', "Owner '{$owner->name}' updated", Owner::class, $owner->id);
+        ActivityLogger::log('owner_update', "'{$owner->name}' updated", Owner::class, $owner->id);
 
-        // Check total shares
-        $total = Owner::where('is_active', true)->sum('profit_share_percentage');
-        $message = "Owner updated.";
+        $total   = Owner::where('is_active', true)->sum('profit_share_percentage');
+        $message = "{$owner->type === 'investor' ? 'Investor' : 'Owner'} updated.";
         if (abs($total - 100) > 0.01) {
-            $message .= " Warning: active owner shares total {$total}% (should be 100%).";
+            $message .= " Warning: active profit shares total {$total}% (should be 100%).";
         }
 
         return redirect()->route('owners.index')->with('success', $message);

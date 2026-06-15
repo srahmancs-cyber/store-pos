@@ -75,6 +75,10 @@
                 <i data-lucide="sliders" class="w-4 h-4 flex-shrink-0"></i>
                 Stock Adjustments
             </a>
+            <a href="{{ route('consignment.index') }}" class="nav-item {{ request()->routeIs('consignment.*') ? 'active' : '' }}">
+                <i data-lucide="handshake" class="w-4 h-4 flex-shrink-0"></i>
+                Consignment
+            </a>
             @endif
 
             {{-- Employees --}}

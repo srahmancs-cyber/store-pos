@@ -14,6 +14,10 @@ class Product extends Model
         'barcode',
         'category_id',
         'supplier_id',
+        'consignment_vendor_id',
+        'consignment_rate',
+        'consignment_basis',
+        'is_consignment',
         'cost_price',
         'selling_price',
         'current_stock',
@@ -24,12 +28,14 @@ class Product extends Model
     ];
 
     protected $casts = [
-        'cost_price'    => 'integer',
-        'selling_price' => 'integer',
-        'current_stock' => 'integer',
-        'reorder_point' => 'integer',
-        'has_serial'    => 'boolean',
-        'is_active'     => 'boolean',
+        'cost_price'              => 'integer',
+        'selling_price'           => 'integer',
+        'current_stock'           => 'integer',
+        'reorder_point'           => 'integer',
+        'has_serial'              => 'boolean',
+        'is_active'               => 'boolean',
+        'is_consignment'          => 'boolean',
+        'consignment_rate'        => 'decimal:2',
     ];
 
     // -------------------------------------------------------------------------
@@ -58,6 +64,11 @@ class Product extends Model
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
+    }
+
+    public function consignmentVendor(): BelongsTo
+    {
+        return $this->belongsTo(ConsignmentVendor::class, 'consignment_vendor_id');
     }
 
     public function saleItems(): HasMany

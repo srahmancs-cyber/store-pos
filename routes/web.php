@@ -9,6 +9,7 @@ use App\Http\Controllers\Settings\SettingsController;
 use App\Http\Controllers\Inventory\CategoryController;
 use App\Http\Controllers\Inventory\SupplierController;
 use App\Http\Controllers\Inventory\ProductController;
+use App\Http\Controllers\Consignment\ConsignmentController;
 use App\Http\Controllers\Inventory\ProductImportExportController;
 use App\Http\Controllers\Inventory\PurchaseOrderController;
 use App\Http\Controllers\Inventory\StockAdjustmentController;
@@ -135,7 +136,20 @@ Route::middleware(['auth', 'role:admin,manager,cashier'])->group(function () {
         Route::post('/profit/calculate', [ProfitController::class, 'calculate'])->name('profit.calculate')->middleware('role:admin');
     });
 
-    // Owners
+    // Consignment / Third-party vendors
+    Route::middleware('role:admin,manager')->prefix('consignment')->name('consignment.')->group(function () {
+        Route::get('/',                                 [ConsignmentController::class, 'index'])->name('index');
+        Route::get('/create',                           [ConsignmentController::class, 'create'])->name('create');
+        Route::post('/',                                [ConsignmentController::class, 'store'])->name('store');
+        Route::get('/{consignment}',                    [ConsignmentController::class, 'show'])->name('show');
+        Route::get('/{consignment}/edit',               [ConsignmentController::class, 'edit'])->name('edit');
+        Route::put('/{consignment}',                    [ConsignmentController::class, 'update'])->name('update');
+        Route::post('/{consignment}/payout',            [ConsignmentController::class, 'generatePayout'])->name('payout.generate');
+        Route::post('/payouts/{payout}/mark-paid',      [ConsignmentController::class, 'markPayoutPaid'])->name('payout.paid');
+        Route::get('/report',                           [ConsignmentController::class, 'report'])->name('report');
+    });
+
+    // Owners (investors included)
     Route::middleware('role:admin')->prefix('owners')->name('owners.')->group(function () {
         Route::get('/',                [OwnerController::class, 'index'])->name('index');
         Route::get('/list',            [OwnerController::class, 'list'])->name('list');

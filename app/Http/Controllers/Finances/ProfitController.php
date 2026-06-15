@@ -81,6 +81,11 @@ class ProfitController extends Controller
                 ->sum('remaining_balance');
             // remaining_balance at time of write-off represents the un-recovered amount
 
+            // ── Consignment vendor payouts (paid in period) ──────────────────
+            $consignmentPayouts = \App\Models\ConsignmentPayout::where('status', 'paid')
+                ->whereBetween('paid_date', [$periodStart->toDateString(), $periodEnd->toDateString()])
+                ->sum('vendor_payout_amount');
+
             // ── Donations given ───────────────────────────────────────────────
             $donationsGiven = Donation::where('status', 'given')
                 ->whereBetween('given_date', [$periodStart->toDateString(), $periodEnd->toDateString()])
@@ -92,19 +97,21 @@ class ProfitController extends Controller
                 - $totalExpenses
                 - $totalSalaries
                 - $writtenOffLoans
+                - $consignmentPayouts
                 - $donationsGiven
                 + $otherIncomeCents;
 
             $details = [
-                'total_sales_revenue' => $totalSalesRevenue,
-                'cogs'                => $cogs,
-                'total_expenses'      => $totalExpenses,
-                'total_salaries'      => $totalSalaries,
-                'written_off_loans'   => $writtenOffLoans,
-                'donations_given'     => $donationsGiven,
-                'other_income'        => $otherIncomeCents,
-                'net_profit'          => $netProfit,
-                'calculated_at'       => now()->toIso8601String(),
+                'total_sales_revenue'  => $totalSalesRevenue,
+                'cogs'                 => $cogs,
+                'total_expenses'       => $totalExpenses,
+                'total_salaries'       => $totalSalaries,
+                'written_off_loans'    => $writtenOffLoans,
+                'consignment_payouts'  => $consignmentPayouts,
+                'donations_given'      => $donationsGiven,
+                'other_income'         => $otherIncomeCents,
+                'net_profit'           => $netProfit,
+                'calculated_at'        => now()->toIso8601String(),
             ];
 
             // Save or overwrite calculation
@@ -141,18 +148,31 @@ class ProfitController extends Controller
                 ]);
             }
 
-            // Allocate profit to owners
-            if ($netProfit > 0) {
-                $owners = Owner::all();
-                foreach ($owners as $owner) {
-                    $ownerShare = (int) round($netProfit * ($owner->profit_share_percentage / 100));
+            // Allocate profit to owners AND investors
+            if ($netProfit > 0 || true) { // always allocate, even if negative (record the loss share)
+                $activeParticipants = \App\Models\Owner::where('is_active', true)->get();
+                foreach ($activeParticipants as $participant) {
+                    // Skip investors with expired agreements
+                    if ($participant->type === 'investor'
+                        && $participant->agreement_end_date
+                        && $participant->agreement_end_date->lt($periodEnd)) {
+                        continue;
+                    }
 
-                    OwnerTransaction::create([
-                        'owner_id'         => $owner->id,
+                    // Determine the profit base for this participant
+                    $base = $participant->profit_basis === 'sales_revenue'
+                        ? $totalSalesRevenue
+                        : $netProfit;
+
+                    $participantShare = (int) round($base * ($participant->profit_share_percentage / 100));
+
+                    \App\Models\OwnerTransaction::create([
+                        'owner_id'         => $participant->id,
                         'type'             => 'profit_allocation',
-                        'amount'           => $ownerShare,
+                        'amount'           => $participantShare,
                         'transaction_date' => $periodEnd->toDateString(),
-                        'notes'            => "Profit allocation for period {$periodStart->toDateString()} – {$periodEnd->toDateString()}",
+                        'notes'            => "Profit allocation for {$periodStart->toDateString()} – {$periodEnd->toDateString()}"
+                            . ($participant->type === 'investor' ? ' (investor)' : ''),
                         'created_by'       => Auth::id(),
                     ]);
                 }

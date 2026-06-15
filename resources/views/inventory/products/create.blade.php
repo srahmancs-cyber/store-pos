@@ -117,6 +117,48 @@
             </div>
         </div>
 
+        {{-- Consignment --}}
+        <div class="card" x-data="{ isConsignment: {{ old('is_consignment') ? 'true' : 'false' }} }">
+            <div class="card-header flex items-center justify-between">
+                <h3>Consignment</h3>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="is_consignment" name="is_consignment" value="1"
+                        x-model="isConsignment" class="rounded border-gray-300">
+                    <label for="is_consignment" class="text-sm text-gray-700">This is a consignment product</label>
+                </div>
+            </div>
+            <div x-show="isConsignment" x-cloak class="card-body space-y-4 border-t border-gray-100">
+                <p class="text-xs text-gray-500">The vendor places this product in your store. You keep a commission percentage per sale.</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="form-label">Consignment Vendor</label>
+                        <select name="consignment_vendor_id" class="form-select">
+                            <option value="">Select vendor</option>
+                            @foreach(\App\Models\ConsignmentVendor::where('is_active',true)->orderBy('name')->get() as $cv)
+                            <option value="{{ $cv->id }}" {{ old('consignment_vendor_id') == $cv->id ? 'selected' : '' }}>
+                                {{ $cv->name }} ({{ $cv->default_commission_rate }}% default)
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Override Commission % <span class="text-xs text-gray-400">(optional)</span></label>
+                        <input type="number" name="consignment_rate" step="0.01" min="0" max="100"
+                            class="form-input" value="{{ old('consignment_rate') }}"
+                            placeholder="Leave blank to use vendor default">
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label">Override Basis <span class="text-xs text-gray-400">(optional)</span></label>
+                    <select name="consignment_basis" class="form-select w-48">
+                        <option value="">Use vendor default</option>
+                        <option value="sale_price" {{ old('consignment_basis')==='sale_price'?'selected':'' }}>% of Sale Price</option>
+                        <option value="profit" {{ old('consignment_basis')==='profit'?'selected':'' }}>% of Profit</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
         <div class="flex gap-3 justify-end">
             <a href="{{ route('inventory.products.index') }}" class="btn-secondary">Cancel</a>
             <button type="submit" class="btn-primary">Create Product</button>
