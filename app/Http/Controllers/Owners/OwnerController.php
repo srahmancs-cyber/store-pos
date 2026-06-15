@@ -99,7 +99,8 @@ class OwnerController extends Controller
 
         ActivityLogger::log('owner_create', "'{$owner->name}' ({$owner->type}) added with {$owner->profit_share_percentage}% share", Owner::class, $owner->id);
 
-        $message = "{$owner->type === 'investor' ? 'Investor' : 'Owner'} '{$owner->name}' added.";
+        $typeLabel = $owner->type === 'investor' ? 'Investor' : 'Owner';
+        $message   = "{$typeLabel} '{$owner->name}' added.";
         if ($newTotal > 100) {
             $message .= " Warning: total profit shares now exceed 100% ({$newTotal}%). Please adjust shares.";
         }
@@ -140,8 +141,9 @@ class OwnerController extends Controller
 
         ActivityLogger::log('owner_update', "'{$owner->name}' updated", Owner::class, $owner->id);
 
-        $total   = Owner::where('is_active', true)->sum('profit_share_percentage');
-        $message = "{$owner->type === 'investor' ? 'Investor' : 'Owner'} updated.";
+        $total      = Owner::where('is_active', true)->sum('profit_share_percentage');
+        $typeLabel  = $owner->type === 'investor' ? 'Investor' : 'Owner';
+        $message    = "{$typeLabel} updated.";
         if (abs($total - 100) > 0.01) {
             $message .= " Warning: active profit shares total {$total}% (should be 100%).";
         }
