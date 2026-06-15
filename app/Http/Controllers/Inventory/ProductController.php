@@ -79,13 +79,14 @@ class ProductController extends Controller
 
         $data = $request->only('name', 'sku', 'barcode', 'category_id', 'supplier_id', 'current_stock', 'reorder_point', 'has_serial');
         $data['selling_price']        = Money::toCents($request->selling_price);
-        $data['cost_price']           = Money::toCents($request->cost_price);
-        $data['is_active']            = $request->boolean('is_active', true);
-        $data['has_serial']           = $request->boolean('has_serial', false);
-        $data['is_consignment']       = $request->boolean('is_consignment', false);
+        $data['cost_price']            = Money::toCents($request->cost_price);
+        $data['is_active']             = $request->boolean('is_active', true);
+        $data['has_serial']            = $request->boolean('has_serial', false);
+        $data['is_consignment']        = $request->boolean('is_consignment', false);
         $data['consignment_vendor_id'] = $data['is_consignment'] ? $request->consignment_vendor_id : null;
-        $data['consignment_rate']     = $data['is_consignment'] && $request->filled('consignment_rate') ? $request->consignment_rate : null;
-        $data['consignment_basis']    = $data['is_consignment'] && $request->filled('consignment_basis') ? $request->consignment_basis : null;
+        $data['consignment_rate']      = $data['is_consignment'] && $request->filled('consignment_rate') ? $request->consignment_rate : null;
+        $data['consignment_basis']     = $data['is_consignment'] && $request->filled('consignment_basis') ? $request->consignment_basis : null;
+        $data['investor_id']           = $request->filled('investor_id') ? $request->investor_id : null;
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('products', 'public');
@@ -149,14 +150,15 @@ class ProductController extends Controller
         ]);
 
         $data = $request->only('name', 'sku', 'barcode', 'category_id', 'supplier_id', 'reorder_point');
-        $data['selling_price']        = Money::toCents($request->selling_price);
-        $data['cost_price']           = Money::toCents($request->cost_price);
-        $data['is_active']            = $request->boolean('is_active');
-        $data['has_serial']           = $request->boolean('has_serial');
-        $data['is_consignment']       = $request->boolean('is_consignment', false);
+        $data['selling_price']         = Money::toCents($request->selling_price);
+        $data['cost_price']            = Money::toCents($request->cost_price);
+        $data['is_active']             = $request->boolean('is_active');
+        $data['has_serial']            = $request->boolean('has_serial');
+        $data['is_consignment']        = $request->boolean('is_consignment', false);
         $data['consignment_vendor_id'] = $data['is_consignment'] ? $request->consignment_vendor_id : null;
-        $data['consignment_rate']     = $data['is_consignment'] && $request->filled('consignment_rate') ? $request->consignment_rate : null;
-        $data['consignment_basis']    = $data['is_consignment'] && $request->filled('consignment_basis') ? $request->consignment_basis : null;
+        $data['consignment_rate']      = $data['is_consignment'] && $request->filled('consignment_rate') ? $request->consignment_rate : null;
+        $data['consignment_basis']     = $data['is_consignment'] && $request->filled('consignment_basis') ? $request->consignment_basis : null;
+        $data['investor_id']           = $request->filled('investor_id') ? $request->investor_id : null;
 
         if ($request->hasFile('image')) {
             // Remove old image

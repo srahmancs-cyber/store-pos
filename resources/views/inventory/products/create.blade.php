@@ -117,9 +117,36 @@
             </div>
         </div>
 
-        {{-- Consignment --}}
-        <div class="card" x-data="{ isConsignment: {{ old('is_consignment') ? 'true' : 'false' }} }">
+        {{-- Investor Funding --}}
+        @php $investors = \App\Models\Owner::where('type','investor')->where('is_active',true)->orderBy('name')->get(); @endphp
+        @if($investors->count() > 0)
+        <div class="card">
             <div class="card-header flex items-center justify-between">
+                <h3>Investor Funding</h3>
+                <span class="text-xs text-gray-400">Optional — link this product to an investor</span>
+            </div>
+            <div class="card-body space-y-2">
+                <p class="text-xs text-gray-500">
+                    If this product was purchased using an investor's funds, link it here.
+                    The investor's contribution total is automatically calculated from linked products.
+                </p>
+                <div>
+                    <label class="form-label">Funded by Investor</label>
+                    <select name="investor_id" class="form-select w-64">
+                        <option value="">— Not investor-funded —</option>
+                        @foreach($investors as $inv)
+                        <option value="{{ $inv->id }}" {{ old('investor_id') == $inv->id ? 'selected' : '' }}>
+                            {{ $inv->name }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        {{-- Consignment --}}
+        <div class="card" x-data="{ isConsignment: {{ old('is_consignment') ? 'true' : 'false' }} }">            <div class="card-header flex items-center justify-between">
                 <h3>Consignment</h3>
                 <div class="flex items-center gap-2">
                     <input type="checkbox" id="is_consignment" name="is_consignment" value="1"

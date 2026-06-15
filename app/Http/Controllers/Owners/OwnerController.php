@@ -41,12 +41,19 @@ class OwnerController extends Controller
                 $totalProfit    = $owner->transactions->where('type', 'profit_allocation')->sum('amount');
                 $equity         = $totalInvested + $totalProfit - $totalWithdrawn;
 
+                // For investors: use computed product-based contribution
+                $computedContribution = $owner->computed_contribution;
+
                 return [
-                    'owner'           => $owner,
-                    'total_invested'  => $totalInvested,
-                    'total_withdrawn' => $totalWithdrawn,
-                    'total_profit'    => $totalProfit,
-                    'equity'          => $equity,
+                    'owner'                 => $owner,
+                    'total_invested'        => $totalInvested,
+                    'total_withdrawn'       => $totalWithdrawn,
+                    'total_profit'          => $totalProfit,
+                    'equity'                => $equity,
+                    'computed_contribution' => $computedContribution,
+                    'invested_products'     => $owner->type === 'investor'
+                        ? $owner->investedProducts()->with('category')->get()
+                        : collect(),
                 ];
             });
 

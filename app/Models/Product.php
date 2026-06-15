@@ -18,6 +18,7 @@ class Product extends Model
         'consignment_rate',
         'consignment_basis',
         'is_consignment',
+        'investor_id',
         'cost_price',
         'selling_price',
         'current_stock',
@@ -69,6 +70,11 @@ class Product extends Model
     public function consignmentVendor(): BelongsTo
     {
         return $this->belongsTo(ConsignmentVendor::class, 'consignment_vendor_id');
+    }
+
+    public function investor(): BelongsTo
+    {
+        return $this->belongsTo(Owner::class, 'investor_id');
     }
 
     public function saleItems(): HasMany

@@ -61,12 +61,10 @@
                 {{-- Investor-specific fields --}}
                 <div x-show="type === 'investor'" class="space-y-4 border-t border-gray-100 pt-4">
                     <p class="text-xs text-gray-500 uppercase tracking-wider font-medium">Investor Agreement</p>
-                    <div>
-                        <label class="form-label">Contribution Amount ({{ $sym }})</label>
-                        <input type="number" name="contribution_amount" step="0.01" min="0"
-                            class="form-input" value="{{ old('contribution_amount','0') }}"
-                            placeholder="Total funds invested">
-                        <p class="text-xs text-gray-400 mt-1">For reference and ROI calculations only.</p>
+                    <div class="alert alert-info text-xs">
+                        <i data-lucide="info" class="w-4 h-4 flex-shrink-0"></i>
+                        The invested amount is calculated automatically from products linked to this investor. 
+                        Just assign products to this investor when creating/editing them.
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>

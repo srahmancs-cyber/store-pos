@@ -75,6 +75,54 @@
                     </p>
                 </div>
             </div>
+            {{-- Investor contribution from linked products --}}
+            @if(($owner->type ?? 'owner') === 'investor')
+            <div class="border border-blue-100 rounded-lg bg-blue-50 p-4 mb-5">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <p class="text-xs font-medium text-blue-800 uppercase tracking-wider">Contribution from Linked Products</p>
+                        <p class="text-xs text-blue-600 mt-0.5">SUM(cost price × current stock) of all products funded by this investor</p>
+                    </div>
+                    <p class="text-xl font-bold text-blue-900">
+                        {{ $sym }}{{ number_format(($ownerData['computed_contribution'] ?? 0) / 100, 2) }}
+                    </p>
+                </div>
+                @if(isset($ownerData['invested_products']) && $ownerData['invested_products']->count())
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs">
+                        <thead><tr class="border-b border-blue-200">
+                            <th class="text-left pb-1.5 text-blue-700 font-medium">Product</th>
+                            <th class="text-right pb-1.5 text-blue-700 font-medium">Stock</th>
+                            <th class="text-right pb-1.5 text-blue-700 font-medium">Cost/Unit</th>
+                            <th class="text-right pb-1.5 text-blue-700 font-medium">Total Cost</th>
+                        </tr></thead>
+                        <tbody>
+                            @foreach($ownerData['invested_products'] as $p)
+                            <tr class="border-b border-blue-100 last:border-0">
+                                <td class="py-1.5 text-blue-900 font-medium">{{ $p->name }}</td>
+                                <td class="py-1.5 text-right text-blue-700">{{ $p->current_stock }}</td>
+                                <td class="py-1.5 text-right text-blue-700">{{ $sym }}{{ number_format($p->cost_price/100,2) }}</td>
+                                <td class="py-1.5 text-right font-semibold text-blue-900">
+                                    {{ $sym }}{{ number_format(($p->cost_price * $p->current_stock)/100,2) }}
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-xs text-blue-500 mt-2">
+                    <a href="{{ route('inventory.products.index') }}" class="underline">Manage products</a>
+                    to add or remove products linked to this investor.
+                </p>
+                @else
+                <p class="text-xs text-blue-600">
+                    No products linked yet.
+                    <a href="{{ route('inventory.products.index') }}" class="underline font-medium">Go to Products</a>
+                    and set "Funded by Investor" when creating or editing a product.
+                </p>
+                @endif
+            </div>
+            @endif
 
             {{-- Transaction History --}}
             <div class="border border-gray-100 rounded-lg overflow-hidden">
