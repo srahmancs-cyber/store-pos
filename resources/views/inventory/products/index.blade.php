@@ -10,9 +10,17 @@
 <div class="pt-6 space-y-4">
     <div class="flex items-center justify-between">
         <h1>Products</h1>
-        <a href="{{ route('inventory.products.create') }}" class="btn-primary">
-            <i data-lucide="plus" class="w-4 h-4"></i> Add Product
-        </a>
+        <div class="flex gap-2">
+            <a href="{{ route('inventory.products.export') }}" class="btn-secondary">
+                <i data-lucide="download" class="w-4 h-4"></i> Export CSV
+            </a>
+            <a href="{{ route('inventory.products.import') }}" class="btn-secondary">
+                <i data-lucide="upload" class="w-4 h-4"></i> Import CSV
+            </a>
+            <a href="{{ route('inventory.products.create') }}" class="btn-primary">
+                <i data-lucide="plus" class="w-4 h-4"></i> Add Product
+            </a>
+        </div>
     </div>
 
     {{-- Filters --}}

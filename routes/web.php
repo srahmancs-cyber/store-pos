@@ -9,6 +9,7 @@ use App\Http\Controllers\Settings\SettingsController;
 use App\Http\Controllers\Inventory\CategoryController;
 use App\Http\Controllers\Inventory\SupplierController;
 use App\Http\Controllers\Inventory\ProductController;
+use App\Http\Controllers\Inventory\ProductImportExportController;
 use App\Http\Controllers\Inventory\PurchaseOrderController;
 use App\Http\Controllers\Inventory\StockAdjustmentController;
 use App\Http\Controllers\Sales\SaleController;
@@ -84,6 +85,12 @@ Route::middleware(['auth', 'role:admin,manager,cashier'])->group(function () {
     // Inventory
     Route::middleware('role:admin,manager')->prefix('inventory')->name('inventory.')->group(function () {
         Route::resource('products', ProductController::class);
+        // Product import/export
+        Route::get('/products/export',          [ProductImportExportController::class, 'export'])->name('products.export');
+        Route::get('/products/import-template', [ProductImportExportController::class, 'template'])->name('products.import-template');
+        Route::get('/products/import',          [ProductImportExportController::class, 'showImport'])->name('products.import');
+        Route::post('/products/import/preview', [ProductImportExportController::class, 'previewImport'])->name('products.import.preview');
+        Route::post('/products/import/commit',  [ProductImportExportController::class, 'commitImport'])->name('products.import.commit');
         Route::resource('categories', CategoryController::class);
         Route::resource('suppliers', SupplierController::class);
         Route::resource('purchase-orders', PurchaseOrderController::class);
